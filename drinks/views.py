@@ -10,7 +10,7 @@ from rest_framework import status
 
 @api_view(['GET', 'POST'])
 def drink_list(request):
-    #get all from drinnks , serialize them and return json
+    #get all from drinks , serialize them and return json
     if request.method == 'GET': 
         drinks = Drink.objects.all()
         serializer = DrinksSerializer(drinks, many =True)
@@ -23,7 +23,6 @@ def drink_list(request):
             serializer.save()
             return Response(serializer.data, status = status.HTTP_201_CREATED)
 
-
 @api_view(['GET', 'PUT', 'DELETE'])
 def drink_details(request, id):
     try:
@@ -31,14 +30,17 @@ def drink_details(request, id):
     except Drink.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-
     if request.method == 'GET':
         serializer = DrinksSerializer(drink)
         return Response(serializer.data)
+     
+    elif request.method == 'PUT':
+        serializer = DrinksSerializer(drink, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors,  status=status.HTTP_404_NOT_FOUND)
 
-
-    if request.method == 'PUT':
-        pass
-
-    if request.method == 'DELETE':
-        pass
+    elif request.method == 'DELETE':
+        drink.delete()
+        return Response(status = status.HTTP_204_NO_CONTENT)
